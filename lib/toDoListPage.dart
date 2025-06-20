@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'dart:convert';
 
 class ToDoListPage extends StatefulWidget {
   // final DateTime selectedDate;
@@ -13,6 +15,8 @@ class ToDoListPage extends StatefulWidget {
 }
 
 class _ToDoListPageState extends State<ToDoListPage> {
+  DatabaseReference database = FirebaseDatabase.instance.ref();
+
   List<Task> tasks = [];
 
   @override
@@ -118,7 +122,13 @@ class _ToDoListPageState extends State<ToDoListPage> {
               onPressed: () {
                 if (newTaskName != "") {
                   setState(() {
+                    // var date = '${widget.selectedDate.day}${widget.selectedDate.day}${widget.selectedDate.day}';
+                    var date = '20062025';
                     tasks.add(Task(name: newTaskName));
+                    database
+                        .child('calendar/${date}/')
+                        .push()
+                        .set(tasks[tasks.length - 1].toString());
                   });
                 }
 
