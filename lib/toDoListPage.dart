@@ -5,10 +5,10 @@ import 'package:firebase_database/firebase_database.dart';
 import 'dart:convert';
 
 class ToDoListPage extends StatefulWidget {
-  // final DateTime selectedDate;
+  final DateTime selectedDate;
 
-  // ToDoListPage({Key? key, required this.selectedDate}) : super(key: key);
-  ToDoListPage({Key? key}) : super(key: key);
+  ToDoListPage({Key? key, required this.selectedDate}) : super(key: key);
+  // ToDoListPage({Key? key}) : super(key: key);
 
   @override
   _ToDoListPageState createState() => _ToDoListPageState();
@@ -122,8 +122,7 @@ class _ToDoListPageState extends State<ToDoListPage> {
               onPressed: () {
                 if (newTaskName != "") {
                   setState(() {
-                    // var date = '${widget.selectedDate.day}${widget.selectedDate.day}${widget.selectedDate.day}';
-                    var date = '20062025';
+                    var date = '${widget.selectedDate.day}${widget.selectedDate.month}${widget.selectedDate.year}';
                     tasks.add(Task(name: newTaskName));
                     database
                         .child('calendar/${date}/')

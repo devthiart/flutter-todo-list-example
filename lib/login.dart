@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:project/calendar.dart';
 import 'toDoListPage.dart';
 
 String email = '';
@@ -49,7 +50,7 @@ class _LoginPageState extends State<LoginPage> {
                   if (email == 'admin' && password == 'password') {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => ToDoListPage()),
+                      MaterialPageRoute(builder: (context) => CalendarPage()),
                     );
                   } else {
                     showDialog(
