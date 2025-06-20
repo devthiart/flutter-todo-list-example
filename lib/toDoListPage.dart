@@ -128,7 +128,13 @@ class _ToDoListPageState extends State<ToDoListPage> {
                     database
                         .child('calendar/${date}/')
                         .push()
-                        .set(tasks[tasks.length - 1].toString());
+                        .set(tasks[tasks.length - 1].toJson())
+                          .then((_) { // <--- ESTE BLOCO É EXECUTADO QUANDO A OPERAÇÃO É BEM-SUCEDIDA
+                            print("Tarefa adicionada com sucesso ao Realtime Database!");
+                          })
+                          .catchError((error) { // <--- ESTE BLOCO É EXECUTADO SE HOUVER UM ERRO
+                            print("Erro ao adicionar tarefa ao Realtime Database: $error");
+                          });
                   });
                 }
 
@@ -187,6 +193,18 @@ class _ToDoListPageState extends State<ToDoListPage> {
 class Task {
   String name;
   bool isCompleted;
+  // String idFirebase;
 
   Task({required this.name, this.isCompleted = false});
+
+  // void setIdFirebase(id) {
+  //   this.idFirebase = id;
+  // }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'isCompleted': isCompleted,
+    };
+  }
 }
