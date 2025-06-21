@@ -32,6 +32,13 @@ class _CalendarPageState extends State<CalendarPage> {
         ),
         backgroundColor: Colors.lightBlueAccent,
         centerTitle: true,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          color: Colors.white,
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
       ),
       body: SingleChildScrollView(
         child: Column(

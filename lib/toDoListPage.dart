@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
-// import 'package:firebase_core/firebase_core.dart';
-// import 'firebase_options.dart';
 import 'package:firebase_database/firebase_database.dart';
-// import 'dart:convert';
 
 class ToDoListPage extends StatefulWidget {
   final DateTime selectedDate;
 
   ToDoListPage({Key? key, required this.selectedDate}) : super(key: key);
-  // ToDoListPage({Key? key}) : super(key: key);
 
   @override
   _ToDoListPageState createState() => _ToDoListPageState();
@@ -18,6 +14,12 @@ class _ToDoListPageState extends State<ToDoListPage> {
   DatabaseReference database = FirebaseDatabase.instance.ref();
 
   List<Task> tasks = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _getTasksFromFirebase(); // Inicializa Tarefas
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -127,13 +129,43 @@ class _ToDoListPageState extends State<ToDoListPage> {
     );
   }
 
+  void _getTasksFromFirebase() async {
+    String formattedDate =
+        '${widget.selectedDate.day}${widget.selectedDate.month}${widget.selectedDate.year}';
+    DatabaseReference tasksNodeRef = database.child('calendar/$formattedDate/');
+    try {
+      final DataSnapshot snapshot = await tasksNodeRef.get();
+
+      final List<Task> loadedTasks = [];
+
+      if (snapshot.exists && snapshot.value != null) {
+        final data = snapshot.value as Map<dynamic, dynamic>;
+        data.forEach((taskId, taskData) {
+          if (taskData != null && taskData is Map) {
+            loadedTasks.add(Task.fromJson(taskData, taskId as String));
+          }
+        });
+      }
+
+      setState(() {
+        tasks = loadedTasks;
+      });
+
+    } catch (error) {
+      print("Erro ao buscar tarefas: $error");
+      setState(() {
+        tasks = [];
+      });
+    }
+  }
+
   void _showAddTaskDialog(BuildContext context) {
     String newTaskName = '';
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Adicionat Tarefa'),
+          title: Text('Adicionar Tarefa'),
           content: TextField(
             onChanged: (value) {
               newTaskName = value;
@@ -148,18 +180,36 @@ class _ToDoListPageState extends State<ToDoListPage> {
               child: Text('Cancelar'),
             ),
             TextButton(
-              onPressed: () {
-                if (newTaskName != "") {
-                  setState(() {
-                    var date = '${widget.selectedDate.day}${widget.selectedDate.month}${widget.selectedDate.year}';
-                    tasks.add(Task(name: newTaskName));
-                    database
-                        .child('calendar/${date}/')
-                        .push()
-                        .set(tasks[tasks.length - 1].toJson());
-                  });
-                }
+              onPressed: () async {
+                if (newTaskName.trim().isNotEmpty) {
+                  String formattedDate =
+                      '${widget.selectedDate.day}${widget.selectedDate.month}${widget.selectedDate.year}';
 
+                  Task newTaskData = Task(name: newTaskName);
+
+                  DatabaseReference newRef = database
+                      .child('calendar/$formattedDate/')
+                      .push();
+
+                  String? firebaseId = newRef.key; // Pega o ID
+
+                  if (firebaseId != null) {
+                    try {
+                      await newRef.set(newTaskData.toJson());
+
+                      setState(() {
+                        newTaskData.setIdFirebase(firebaseId); // Add ID na Task
+                        tasks.add(newTaskData); // Add a Task na lista de tarefas
+                      });
+                      print('Tarefa adicionada com ID: $firebaseId');
+
+                    } catch (error) {
+                      print("Erro ao adicionar tarefa: $error");
+                    }
+                  } else {
+                    print("Erro ao gerar ID para a tarefa.");
+                  }
+                }
                 Navigator.pop(context);
               },
               child: Text('Adicionar'),
@@ -185,11 +235,26 @@ class _ToDoListPageState extends State<ToDoListPage> {
               child: Text('Cancelar'),
             ),
             TextButton(
-              onPressed: () {
-                setState(() {
-                  tasks.clear();
-                });
-                Navigator.pop(context);
+              onPressed: () async {
+                String formattedDate =
+                    '${widget.selectedDate.day}${widget.selectedDate.month}${widget.selectedDate.year}';
+                DatabaseReference dayTasksRef =
+                database.child('calendar/$formattedDate');
+
+                try {
+                  await dayTasksRef.remove(); // Remote todas as tasks do dia no  Firebase
+                  print('Todas as tarefas para $formattedDate removidas do Firebase.');
+
+                  setState(() {
+                    tasks.clear(); // Remove todas as tasks da lista de tarefas no app
+                  });
+
+                  Navigator.pop(context);
+
+                } catch (error) {
+                  print("Erro ao remover todas as tarefas do dia $formattedDate: $error");
+                  Navigator.pop(context);
+                }
               },
               child: Text('Remover todas'),
             ),
@@ -199,30 +264,93 @@ class _ToDoListPageState extends State<ToDoListPage> {
     );
   }
 
-  void _toggleTaskCompletion(int index) {
+  void _toggleTaskCompletion(int index) async {
+    if (index < 0 || index >= tasks.length) return;
+
+    Task taskToUpdate = tasks[index];
+
+    if (taskToUpdate.idFirebase == null || taskToUpdate.idFirebase!.isEmpty) {
+      print("Erro: A tarefa não tem um ID do Firebase para atualização.");
+
+      return;
+    }
+
     setState(() {
-      tasks[index].isCompleted = !tasks[index].isCompleted;
+      taskToUpdate.isCompleted = !taskToUpdate.isCompleted; // Atualiza o status no app
     });
+
+    String formattedDate =
+        '${widget.selectedDate.day}${widget.selectedDate.month}${widget.selectedDate.year}';
+    String firebaseTaskId = taskToUpdate.idFirebase!;
+    DatabaseReference taskRef =
+      database.child('calendar/$formattedDate/$firebaseTaskId');
+
+    try {
+      // Atualize apenas o campo 'isCompleted' no Firebase
+      await taskRef.update({
+        'isCompleted': taskToUpdate.isCompleted,
+      });
+      print('Status da tarefa $firebaseTaskId atualizado para: ${taskToUpdate.isCompleted}');
+    } catch (error) {
+      print("Erro ao atualizar status da tarefa no Firebase: $error");
+      // Se a atualização do Firebase falhar, desfaz a mudança no app
+      setState(() {
+        taskToUpdate.isCompleted = !taskToUpdate.isCompleted; // Desfaz a mudança no app
+      });
+    }
   }
 
-  void _removeTask(int index) {
-    setState(() {
-      tasks.removeAt(index);
-    });
+  void _removeTask(int index) async {
+    if (index < 0 || index >= tasks.length) return;
+
+    Task taskToRemove = tasks[index];
+
+    if (taskToRemove.idFirebase == null || taskToRemove.idFirebase!.isEmpty) {
+      print("Erro: ID do Firebase não encontrado.");
+      return;
+    }
+
+    String formattedDate =
+        '${widget.selectedDate.day}${widget.selectedDate.month}${widget.selectedDate.year}';
+    String firebaseTaskId = taskToRemove.idFirebase!;
+    DatabaseReference taskRef =
+    database.child('calendar/$formattedDate/$firebaseTaskId');
+
+    try {
+      await taskRef.remove();
+      setState(() {
+        tasks.removeAt(index);
+      });
+      print('Tarefa $firebaseTaskId removida do Firebase.');
+
+    } catch (error) {
+      print("Erro ao remover tarefa do Firebase: $error");
+    }
   }
 }
 
 class Task {
   String name;
   bool isCompleted;
-  // String idFirebase;
+  String? idFirebase;
 
   Task({required this.name, this.isCompleted = false});
 
-  // void setIdFirebase(id) {
-  //   this.idFirebase = id;
-  // }
+  void setIdFirebase(id) {
+    this.idFirebase = id;
+  }
 
+  // Recebe um JSon do Firebase e transforma em uma Task
+  factory Task.fromJson(Map<dynamic, dynamic> json, String id) {
+    Task newTask = Task(
+      name: json['name'] as String? ?? 'Sem nome', // Lida com nome nulo
+      isCompleted: json['isCompleted'] as bool? ?? false, // Lida com isCompleted nulo
+    );
+    newTask.setIdFirebase(id);
+    return newTask;
+  }
+
+  // Transforma em JSon para enviar ao Firebase
   Map<String, dynamic> toJson() {
     return {
       'name': name,
