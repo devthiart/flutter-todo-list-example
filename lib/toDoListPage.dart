@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
+// import 'package:firebase_core/firebase_core.dart';
+// import 'firebase_options.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'dart:convert';
+// import 'dart:convert';
 
 class ToDoListPage extends StatefulWidget {
   final DateTime selectedDate;
@@ -127,13 +127,7 @@ class _ToDoListPageState extends State<ToDoListPage> {
                     database
                         .child('calendar/${date}/')
                         .push()
-                        .set(tasks[tasks.length - 1].toJson())
-                          .then((_) { // <--- ESTE BLOCO É EXECUTADO QUANDO A OPERAÇÃO É BEM-SUCEDIDA
-                            print("Tarefa adicionada com sucesso ao Realtime Database!");
-                          })
-                          .catchError((error) { // <--- ESTE BLOCO É EXECUTADO SE HOUVER UM ERRO
-                            print("Erro ao adicionar tarefa ao Realtime Database: $error");
-                          });
+                        .set(tasks[tasks.length - 1].toJson());
                   });
                 }
 

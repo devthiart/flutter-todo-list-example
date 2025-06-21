@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:project/calendar.dart';
-import 'toDoListPage.dart';
-import 'package:project/registerPage.dart';
+import 'package:project/login.dart';
 
 String email = '';
 String password = '';
 
-class LoginPage extends StatefulWidget {
+class RegisterPage extends StatefulWidget {
   @override
-  _LoginPageState createState() => _LoginPageState();
+  _RegisterPageState createState() => _RegisterPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+
+class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -27,17 +27,17 @@ class _LoginPageState extends State<LoginPage> {
                 title: 'Lista de Tarefas',
                 color: Colors.lightBlueAccent,
                 child: Text(
-                  'Lista de Tarefas',
-                  style: TextStyle(
-                    fontSize: 35,
-                    fontWeight: FontWeight.bold,
-                  )
+                    'Lista de Tarefas',
+                    style: TextStyle(
+                      fontSize: 35,
+                      fontWeight: FontWeight.bold,
+                    )
                 ),
               ),
               SizedBox(height: 40),
               Text(
-                'Login',
-                style: TextStyle(fontSize: 20)
+                  'Registre-se',
+                  style: TextStyle(fontSize: 20)
               ),
               TextField(
                 onChanged: (text) {
@@ -65,16 +65,34 @@ class _LoginPageState extends State<LoginPage> {
               ElevatedButton(
                 onPressed: () {
                   if (email != '' && password != '') {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => CalendarPage()),
+                    showDialog(
+                      context: context,
+                      builder: (context){
+                        return AlertDialog(
+                          title: Text('Registrado com sucesso!'),
+                          content: Text(
+                            'Por favor, faça o login.',
+                          ),
+                          actions: <Widget>[
+                            TextButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => LoginPage()),
+                                );
+                              },
+                              child: Text('Fechar'),
+                            ),
+                          ],
+                        );
+                      },
                     );
                   } else {
                     showDialog(
                       context: context,
                       builder: (context) {
                         return AlertDialog(
-                          title: Text('Login falhou'),
+                          title: Text('Erro ao Registrar'),
                           content: Text(
                             'Por favor, utilize um email e uma senha válida.',
                           ),
@@ -91,7 +109,7 @@ class _LoginPageState extends State<LoginPage> {
                     );
                   }
                 },
-                child: Text('Login'),
+                child: Text('Registrar'),
                 style: ButtonStyle(
                   backgroundColor: MaterialStateProperty.all<Color>(Colors.lightBlueAccent),
                   foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
@@ -104,23 +122,6 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
-              SizedBox(height: 16),
-              Text('Não tem uma conta?'),
-              GestureDetector(
-                child: Text(
-                    'Cadastre-se',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => RegisterPage()),
-                  );
-                }
-              )
             ],
           ),
         ),
