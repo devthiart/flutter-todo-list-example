@@ -23,9 +23,20 @@ class _ToDoListPageState extends State<ToDoListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Todo List'),
+        title: Text(
+          'Tarefas - ${widget.selectedDate.day}/${widget.selectedDate.month}/${widget.selectedDate.year}',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 25,
+          ),
+        ),
+        backgroundColor: Colors.lightBlueAccent,
+        centerTitle: true,
+
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
+          color: Colors.white,
           onPressed: () {
             Navigator.of(context).pop();
           },
@@ -40,17 +51,24 @@ class _ToDoListPageState extends State<ToDoListPage> {
                 return ListTile(
                   title: Text(
                     tasks[index].name,
+                    textAlign: TextAlign.center,
                     style: TextStyle(
                       decoration: tasks[index].isCompleted
                           ? TextDecoration.lineThrough
                           : TextDecoration.none,
+                      color: tasks[index].isCompleted ? Colors.grey : Colors.black,
                     ),
                   ),
-                  leading: Icon(
-                    tasks[index].isCompleted
-                        ? Icons.check_circle
-                        : Icons.radio_button_unchecked,
-                    color: tasks[index].isCompleted ? Colors.green : Colors.red,
+                  leading: IconButton(
+                    icon: Icon(
+                      tasks[index].isCompleted
+                          ? Icons.check_circle
+                          : Icons.radio_button_unchecked,
+                      color: tasks[index].isCompleted ? Colors.green : Colors.black45,
+                    ),
+                    onPressed: () {
+                      _toggleTaskCompletion(index);
+                    },
                   ),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -66,6 +84,7 @@ class _ToDoListPageState extends State<ToDoListPage> {
                         onPressed: () {
                           _removeTask(index);
                         },
+                        color: Colors.redAccent,
                       ),
                     ],
                   ),
@@ -80,20 +99,30 @@ class _ToDoListPageState extends State<ToDoListPage> {
               children: [
                 ElevatedButton(
                   onPressed: () {
-                    _showAddTaskDialog(context);
-                  },
-                  child: Text('Adicionar Tarefa'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
                     _showRemoveAllTasksDialog(context);
                   },
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all<Color>(Colors.redAccent),
+                    foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
+                    padding: MaterialStateProperty.all<EdgeInsets>(EdgeInsets.symmetric(horizontal: 30, vertical: 20)),
+                    textStyle: MaterialStateProperty.all<TextStyle>(TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                  ),
                   child: Text('Remover Todas'),
                 ),
               ],
             ),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          _showAddTaskDialog(context);
+        },
+        child: Icon(Icons.add),
+        backgroundColor: Colors.lightBlueAccent,
+        foregroundColor: Colors.white,
+        elevation: 5,
+        shape: CircleBorder(),
       ),
     );
   }
