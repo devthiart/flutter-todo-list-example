@@ -65,6 +65,8 @@ class _LoginPageState extends State<LoginPage> {
               ElevatedButton(
                 onPressed: () {
                   if (email != '' && password != '') {
+                    email = '';
+                    password = '';
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => CalendarPage()),

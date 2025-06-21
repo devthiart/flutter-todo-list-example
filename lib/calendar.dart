@@ -22,11 +22,20 @@ class _CalendarPageState extends State<CalendarPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Calendario')
+        title: Text(
+          'Calendário',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 25,
+          ),
+        ),
+        backgroundColor: Colors.lightBlueAccent,
+        centerTitle: true,
       ),
       body: SingleChildScrollView(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget> [
             TableCalendar(
               calendarFormat: CalendarFormat.month,
@@ -35,9 +44,27 @@ class _CalendarPageState extends State<CalendarPage> {
               lastDay: DateTime(2050),
               onFormatChanged: (format) {
                 setState(() {
-
+                  _calendarController = format;
                 });
               },
+              calendarStyle: CalendarStyle(
+                todayDecoration: BoxDecoration(
+                  color: Colors.lightBlueAccent,
+                  shape: BoxShape.circle,
+                ),
+                selectedDecoration: BoxDecoration(
+                  color: Colors.deepOrange,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              headerStyle: HeaderStyle(
+                formatButtonVisible: true,
+                titleCentered: true,
+                titleTextStyle: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                )
+              ),
               onDaySelected: (selectedDay, focusedDay) {
                 Navigator.push(
                   context,

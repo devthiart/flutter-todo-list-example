@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:project/calendar.dart';
 import 'package:project/login.dart';
 
-String email = '';
-String password = '';
+String registerEmail = '';
+String registerPassword = '';
 
 class RegisterPage extends StatefulWidget {
   @override
@@ -41,7 +40,7 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               TextField(
                 onChanged: (text) {
-                  email = text;
+                  registerEmail = text;
                 },
                 keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
@@ -52,7 +51,7 @@ class _RegisterPageState extends State<RegisterPage> {
               SizedBox(height: 10),
               TextField(
                 onChanged: (text) {
-                  password = text;
+                  registerPassword = text;
                 },
                 obscureText: true,
                 keyboardType: TextInputType.visiblePassword,
@@ -64,7 +63,7 @@ class _RegisterPageState extends State<RegisterPage> {
               SizedBox(height: 10),
               ElevatedButton(
                 onPressed: () {
-                  if (email != '' && password != '') {
+                  if (registerEmail != '' && registerPassword != '') {
                     showDialog(
                       context: context,
                       builder: (context){
@@ -76,6 +75,8 @@ class _RegisterPageState extends State<RegisterPage> {
                           actions: <Widget>[
                             TextButton(
                               onPressed: () {
+                                registerEmail = '';
+                                registerPassword = '';
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(builder: (context) => LoginPage()),
@@ -109,7 +110,6 @@ class _RegisterPageState extends State<RegisterPage> {
                     );
                   }
                 },
-                child: Text('Registrar'),
                 style: ButtonStyle(
                   backgroundColor: MaterialStateProperty.all<Color>(Colors.lightBlueAccent),
                   foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
@@ -121,6 +121,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                   ),
                 ),
+                child: Text('Registrar'),
               ),
             ],
           ),
